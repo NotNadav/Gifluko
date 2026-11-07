@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { Italic, Plus, Strikethrough, TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, Trash, Underline, Upload, X } from 'lucide-react';
-import type { Anchor, TextLayer } from '../../model/types';
-import { applyStyleToLayer, updateLayer, useEditor } from '../../store/editor';
+import { Italic, Plus, Strikethrough, TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, Underline, Upload, X } from 'lucide-react';
+import type { TextLayer } from '../../model/types';
+import { updateLayer, useEditor } from '../../store/editor';
 import { NumberField } from '../controls/NumberField';
 import { ColorField } from '../controls/ColorField';
 import { FontPicker } from '../controls/FontPicker';
 import { Row, Section, Segmented, SelectField, Toggle } from '../controls/basic';
 import { getFont, nearestWeight } from '../../fonts/registry';
-import { anchorPoint, edgeInset, templatePlacement, TEMPLATES } from '../../model/templates';
-import { pickStyle } from '../../model/defaults';
-import { deleteStyle, pickFile, saveStyle, uploadFontFile } from '../../app/actions';
+import { pickFile, uploadFontFile } from '../../app/actions';
 import { letterSpacingSupported, wordSpacingSupported } from '../../render/layout';
 import { FileInfo } from './FileInfo';
 
@@ -18,7 +16,7 @@ const WEIGHT_NAMES: Record<number, string> = { 100: 'דק מאוד', 200: 'דק'
 
 export function SettingsPanel() {
   const layer = useEditor((s) => s.doc.layers.find((l) => l.id === s.selectedId));
-  const [open, setOpen] = useState<string[]>(['text', 'type', 'layout', 'color', 'effects', 'position']);
+  const [open, setOpen] = useState<string[]>(['text', 'type', 'layout', 'color', 'effects']);
   if (!layer) return <FileInfo />;
   const set = (patch: Partial<TextLayer>, key?: string) => updateLayer(layer.id, patch, key);
   return (
@@ -36,8 +34,6 @@ export function SettingsPanel() {
           <LayoutSection layer={layer} set={set} />
           <ColorSection layer={layer} set={set} />
           <EffectsSection layer={layer} set={set} />
-          <PositionSection layer={layer} set={set} />
-          <StylesSection layer={layer} />
         </Accordion.Root>
       </div>
     </div>
@@ -325,111 +321,6 @@ function EffectsSection({ layer, set }: SP) {
   );
 }
 
-const ANCHORS: Anchor[] = ['tr', 'tc', 'tl', 'mr', 'mc', 'ml', 'br', 'bc', 'bl'];
-const ANCHOR_NAMES: Record<Anchor, string> = {
-  tl: 'למעלה משמאל',
-  tc: 'למעלה במרכז',
-  tr: 'למעלה מימין',
-  ml: 'באמצע משמאל',
-  mc: 'במרכז',
-  mr: 'באמצע מימין',
-  bl: 'למטה משמאל',
-  bc: 'למטה במרכז',
-  br: 'למטה מימין'
-};
-
 export function safeMargin(w: number, h: number) {
   return Math.round(Math.min(w, h) * 0.05);
-}
-
-function PositionSection({ layer, set }: SP) {
-  const source = useEditor((s) => s.source);
-  const showSafe = useEditor((s) => s.showSafe);
-  const jump = (a: Anchor) => {
-    if (!source) return;
-    const p = anchorPoint(a, source.width, source.height, edgeInset(layer, source.width, source.height));
-    set({ anchor: a, ...p }, `anchor:${layer.id}:${Date.now()}`);
-  };
-  return (
-    <Section value="position" title="מיקום">
-      <div className="flex gap-3">
-        <div className="grid shrink-0 grid-cols-3 gap-1 rounded-md border border-line bg-canvas p-1.5" role="group" aria-label="עיגון">
-          {ANCHORS.map((a) => (
-            <button
-              key={a}
-              type="button"
-              title={ANCHOR_NAMES[a]}
-              aria-label={`עיגון ${ANCHOR_NAMES[a]}`}
-              aria-pressed={layer.anchor === a}
-              onClick={() => jump(a)}
-              className={`focus-ring h-6 w-6 rounded-sm border ${layer.anchor === a ? 'border-accent bg-accent' : 'border-line bg-white hover:border-accent'}`}
-            />
-          ))}
-        </div>
-        <div className="min-w-0 flex-1 space-y-2">
-          <NumberField compact label="X" value={Math.round(layer.x)} onChange={(v) => set({ x: v })} unit="px" />
-          <NumberField compact label="Y" value={Math.round(layer.y)} onChange={(v) => set({ y: v })} unit="px" />
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <NumberField className="w-40 shrink-0" label="סיבוב" value={layer.rotation} min={-180} max={180} step={1} unit="°" onChange={(v) => set({ rotation: v })} />
-        <input type="range" dir="ltr" min={-180} max={180} value={layer.rotation} aria-label="סיבוב" className="min-w-0 flex-1" onChange={(e) => set({ rotation: Number(e.target.value) })} />
-      </div>
-      <p className="text-[11px] text-ink-faint">בסיבוב עם הידית, החזיקו Shift להצמדה לכל 15 מעלות.</p>
-      <Toggle label="הצגת שוליים בטוחים" checked={showSafe} onChange={(v) => useEditor.setState({ showSafe: v })} />
-    </Section>
-  );
-}
-
-function StylesSection({ layer }: { layer: TextLayer }) {
-  const saved = useEditor((s) => s.savedStyles);
-  const source = useEditor((s) => s.source);
-  const [name, setName] = useState('');
-  const applyTemplate = (id: string) => {
-    const t = TEMPLATES.find((x) => x.id === id);
-    if (!t || !source) return;
-    const style = t.style(source.width, source.height);
-    const place = templatePlacement(t, style, source.width, source.height);
-    updateLayer(layer.id, (l) => Object.assign(l, style, place), `style:${layer.id}:${Date.now()}`);
-  };
-  return (
-    <Section value="styles" title="תבניות וסגנונות">
-      <div className="grid grid-cols-2 gap-1.5">
-        {TEMPLATES.map((t) => (
-          <button key={t.id} type="button" className="btn-outline text-xs" onClick={() => applyTemplate(t.id)}>
-            {t.name}
-          </button>
-        ))}
-      </div>
-      {saved.length > 0 && (
-        <div className="space-y-1">
-          <div className="label">הסגנונות שלי</div>
-          {saved.map((s) => (
-            <div key={s.id} className="flex items-center gap-1">
-              <button type="button" className="btn-outline flex-1 justify-start truncate text-xs" onClick={() => applyStyleToLayer(layer.id, s.style)}>
-                {s.name}
-              </button>
-              <button type="button" className="btn-ghost h-8 px-1.5" aria-label={`מחיקת הסגנון ${s.name}`} onClick={() => deleteStyle(s.id)}>
-                <Trash size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <form
-        className="flex gap-1.5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const n = name.trim() || `סגנון ${saved.length + 1}`;
-          void saveStyle(n, pickStyle(layer));
-          setName('');
-        }}
-      >
-        <input className="field" placeholder="שם לסגנון" value={name} onChange={(e) => setName(e.target.value)} aria-label="שם לסגנון" />
-        <button type="submit" className="btn-accent shrink-0 text-xs">
-          שמירת סגנון
-        </button>
-      </form>
-    </Section>
-  );
 }
