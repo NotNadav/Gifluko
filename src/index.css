@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f3f1f8;
+  color: #1d1a26;
+  font-family: 'Heebo Variable', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+.checker {
+  background-color: #fff;
+  background-image: linear-gradient(45deg, #e6e3ee 25%, transparent 25%), linear-gradient(-45deg, #e6e3ee 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e6e3ee 75%), linear-gradient(-45deg, transparent 75%, #e6e3ee 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.workspace-bg {
+  background-color: #ebe8f2;
+  background-image: radial-gradient(#d9d5e4 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+@layer components {
+.focus-ring {
+  @apply outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1;
+}
+
+.btn {
+  @apply focus-ring inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40;
+}
+
+.btn-ghost {
+  @apply btn text-ink hover:bg-black/5;
+}
+
+.btn-dark {
+  @apply btn bg-white/10 text-white hover:bg-white/20;
+}
+
+.btn-accent {
+  @apply btn bg-accent text-white shadow-sm hover:bg-accent-strong;
+}
+
+.btn-outline {
+  @apply btn border border-line bg-white text-ink hover:border-accent/50 hover:bg-accent-soft;
+}
+
+.field {
+  @apply focus-ring h-8 w-full rounded-md border border-line bg-white px-2 text-sm text-ink hover:border-ink-faint/60 focus:border-accent;
+}
+
+.seg {
+  @apply flex rounded-md border border-line bg-white p-0.5;
+}
+
+.seg > button {
+  @apply focus-ring flex h-7 flex-1 items-center justify-center rounded px-1.5 text-xs text-ink-soft hover:text-ink;
+}
+
+.seg > button[aria-pressed='true'] {
+  @apply bg-accent text-white;
+}
+
+.label {
+  @apply text-xs text-ink-soft;
+}
+}
+
+input[type='range'] {
+  accent-color: #6d4aff;
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #cfcadc transparent;
+}
+
+.react-colorful {
+  width: 100% !important;
+  height: 160px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
