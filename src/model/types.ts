@@ -65,8 +65,6 @@ export interface ExportSettings {
   quality: number;
   loop: LoopMode;
   loopTimes: number;
-  frameStep: number;
-  targetSizeKB: number;
   optimize: boolean;
 }
 

@@ -3,9 +3,9 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Download, TriangleExclamationPoint, X } from 'lucide-react';
 import { toast, updateExport, useEditor } from '../store/editor';
 import type { ExportSettings } from '../model/types';
-import { downloadBlob, estimateGifSize, ExportCancelled, formatBytes, frameSelection, outputName, outputSize, runExport } from '../export/exporter';
+import { downloadBlob, estimateGifSize, ExportCancelled, formatBytes, outputName, outputSize, runExport } from '../export/exporter';
 import { NumberField } from './controls/NumberField';
-import { Row, Segmented, SelectField, Toggle } from './controls/basic';
+import { Row, Segmented, Toggle } from './controls/basic';
 
 const LARGE_BYTES = 8 * 1024 * 1024;
 
@@ -33,7 +33,7 @@ export function ExportDialog() {
   const { w, h } = outputSize(source, settings);
   const isGif = settings.format === 'gif';
   const animatedFormat = settings.format !== 'png';
-  const frames = frameSelection(source.delays, settings.frameStep).indices.length;
+  const frames = source.frameCount;
   const effectsOnAlpha =
     source.hasAlpha && isGif && layers.some((l) => l.visible && (l.stroke.width > 0 || l.shadow.enabled || l.glow.enabled));
 
@@ -62,29 +62,6 @@ export function ExportDialog() {
     } finally {
       setEstimating(false);
     }
-  };
-
-  const autoFit = async () => {
-    const target = settings.targetSizeKB * 1024;
-    if (!target) return;
-    setEstimating(true);
-    let s = { ...settings };
-    let est = await doEstimate(s);
-    const colorSteps = [128, 64, 32, 16].filter((c) => c < s.colors);
-    for (const c of colorSteps) {
-      if (est == null || est <= target) break;
-      s = { ...s, colors: c };
-      est = await doEstimate(s);
-    }
-    while (est != null && est > target && s.scale > 15) {
-      s = { ...s, scale: Math.max(10, Math.round(s.scale * Math.sqrt(target / est) * 0.95)) };
-      est = await doEstimate(s);
-    }
-    setEstimating(false);
-    if (est == null) return;
-    updateExport({ colors: s.colors, scale: s.scale });
-    setTimeout(() => setEstimate(est), 0);
-    toast(est <= target ? `ההגדרות עודכנו: ${s.colors} צבעים, ${s.scale}% גודל.` : 'לא הצלחנו להגיע לגודל היעד. נסו לדלג על פריימים.', est <= target ? 'info' : 'warn');
   };
 
   const doExport = async () => {
@@ -213,24 +190,11 @@ export function ExportDialog() {
                 {settings.loop === 'count' && settings.format !== 'mp4' && (
                   <NumberField label="פעמים" value={settings.loopTimes} min={1} max={1000} onChange={(v) => set({ loopTimes: v })} />
                 )}
-                <Row label="פריימים">
-                  <SelectField
-                    label="דילוג על פריימים"
-                    value={settings.frameStep}
-                    onChange={(v) => set({ frameStep: v })}
-                    options={[
-                      { value: 1, label: `כל הפריימים (${source.frameCount})` },
-                      { value: 2, label: `כל פריים שני (${Math.ceil(source.frameCount / 2)})` },
-                      { value: 3, label: `כל פריים שלישי (${Math.ceil(source.frameCount / 3)})` },
-                      { value: 4, label: `כל פריים רביעי (${Math.ceil(source.frameCount / 4)})` }
-                    ]}
-                  />
-                </Row>
               </>
             )}
 
             {isGif && (
-              <div className="space-y-2 rounded-lg bg-canvas p-3">
+              <div className="rounded-lg bg-canvas p-3">
                 <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="text-ink-soft">גודל משוער</span>
                   <span className="font-semibold tabular-nums">{estimating ? 'מחשב…' : estimate != null ? `~${formatBytes(estimate)}` : '—'}</span>
@@ -238,20 +202,13 @@ export function ExportDialog() {
                     חישוב
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <NumberField className="min-w-0 flex-1" label="גודל יעד" unit="KB" value={settings.targetSizeKB} min={0} max={100000} onChange={(v) => set({ targetSizeKB: v })} />
-                  <button type="button" className="btn-outline shrink-0 px-2 text-xs" disabled={!settings.targetSizeKB || estimating} onClick={autoFit}>
-                    התאמה אוטומטית
-                  </button>
-                </div>
-                <p className="text-[11px] text-ink-faint">0 = ללא הגבלה. ההתאמה מורידה צבעים ואז ממדים עד שהקובץ קטן מהיעד.</p>
               </div>
             )}
 
             {effectsOnAlpha && (
               <Warn>לגיף יש רקע שקוף. בגיף אין שקיפות חלקית, ולכן קו מתאר, צל או זוהר עלולים ליצור שוליים מחוספסים מעל אזורים שקופים.</Warn>
             )}
-            {tooLarge && <Warn>הקובץ צפוי להיות גדול מאוד. אפשר להקטין ממדים, להוריד את מספר הצבעים, או לדלג על פריימים.</Warn>}
+            {tooLarge && <Warn>הקובץ צפוי להיות גדול מאוד. אפשר להקטין ממדים או להוריד את מספר הצבעים.</Warn>}
           </fieldset>
 
           {running ? (

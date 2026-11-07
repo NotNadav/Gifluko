@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
-import { Italic, Plus, Strikethrough, TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, Underline, Upload, X } from 'lucide-react';
+import { ChevronDown, Italic, Plus, Strikethrough, TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, Underline, Upload, X } from 'lucide-react';
 import type { TextLayer } from '../../model/types';
 import { updateLayer, useEditor } from '../../store/editor';
 import { NumberField } from '../controls/NumberField';
@@ -122,9 +122,17 @@ function TypographySection({ layer, set }: SP) {
           ]}
         />
       </Row>
-      <NumberField label="ריווח אותיות" value={layer.letterSpacing} min={-20} max={100} unit="%" disabled={!lsOk} onChange={(v) => set({ letterSpacing: v })} />
-      {!lsOk && <p className="text-[11px] text-amber-700">הדפדפן הזה לא תומך בריווח אותיות על משטח ציור.</p>}
-      <NumberField label="גובה שורה" value={layer.lineHeight} min={0.6} max={3} step={0.05} precision={2} onChange={(v) => set({ lineHeight: v })} />
+      <details className="group">
+        <summary className="focus-ring flex cursor-pointer list-none items-center gap-1 rounded text-xs text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
+          <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
+          מתקדם
+        </summary>
+        <div className="mt-2.5 space-y-2.5">
+          <NumberField label="ריווח אותיות" value={layer.letterSpacing} min={-20} max={100} unit="%" disabled={!lsOk} onChange={(v) => set({ letterSpacing: v })} />
+          {!lsOk && <p className="text-[11px] text-amber-700">הדפדפן הזה לא תומך בריווח אותיות על משטח ציור.</p>}
+          <NumberField label="גובה שורה" value={layer.lineHeight} min={0.6} max={3} step={0.05} precision={2} onChange={(v) => set({ lineHeight: v })} />
+        </div>
+      </details>
     </Section>
   );
 }

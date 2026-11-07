@@ -65,8 +65,6 @@ export const defaultExport = (): ExportSettings => ({
   quality: 80,
   loop: 'source',
   loopTimes: 1,
-  frameStep: 1,
-  targetSizeKB: 0,
   optimize: true
 });
 

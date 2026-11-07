@@ -40,7 +40,7 @@ export async function startProject(blob: Blob, fileName: string, doc: Doc | null
     const missing = doc ? computeMissing(doc) : [];
     setState({ customFonts, missingFonts: missing });
     if (missing.length) toast('חלק מהפונטים בפרויקט לא נמצאו. הוחלפו זמנית ב־Heebo. אפשר לטעון אותם מלוח ההגדרות.', 'warn', undefined, 10000);
-    if (source.frameCount > MANY_FRAMES) toast(`בקובץ ${source.frameCount} פריימים. מומלץ להקטין ממדים או לדלג על פריימים בייצוא.`, 'warn', undefined, 10000);
+    if (source.frameCount > MANY_FRAMES) toast(`בקובץ ${source.frameCount} פריימים. מומלץ להקטין ממדים בייצוא.`, 'warn', undefined, 10000);
     if (!projectId) {
       try {
         await saveBlob(id, source.blob);

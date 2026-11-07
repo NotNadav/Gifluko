@@ -160,7 +160,7 @@ function gifOptions(job: ExportJob, w: number, h: number): GifStreamOptions {
 
 async function exportGif(job: ExportJob): Promise<Blob> {
   const r = await makeRenderer(job);
-  const sel = frameSelection(job.source.delays, job.settings.frameStep);
+  const sel = frameSelection(job.source.delays, 1);
   const total = sel.indices.length;
   const { bytes } = await runGifWorker(
     gifOptions(job, r.w, r.h),
@@ -193,7 +193,7 @@ async function exportFfmpeg(job: ExportJob, format: 'mp4' | 'webp'): Promise<Blo
   const ff = await getFFmpeg();
   check(job.signal);
   const r = await makeRenderer(job);
-  const sel = frameSelection(job.source.delays, job.settings.frameStep);
+  const sel = frameSelection(job.source.delays, 1);
   await cleanFS(ff, 'ex_');
   const lines: string[] = [];
   const onAbort = () => resetFFmpeg();
@@ -257,7 +257,7 @@ export async function runExport(job: ExportJob, frameIndex = 0): Promise<Blob> {
 
 export async function estimateGifSize(job: ExportJob): Promise<number> {
   const r = await makeRenderer(job);
-  const sel = frameSelection(job.source.delays, job.settings.frameStep);
+  const sel = frameSelection(job.source.delays, 1);
   const n = sel.indices.length;
   const runLen = Math.min(n, 4);
   const starts = n <= 8 ? [0] : [0, Math.floor(n / 2)];
