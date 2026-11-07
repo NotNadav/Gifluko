@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import * as Popover from '@radix-ui/react-popover';
-import { ChevronDown, Download, FolderOpen, Keyboard, Redo2, Undo2, X } from 'lucide-react';
+import { Download, FolderOpen, Keyboard, Redo2, Undo2 } from 'lucide-react';
 import { redo, undo, useEditor } from '../store/editor';
 import { closeCurrent, openFile, pickFile } from '../app/actions';
 import { ACCEPT } from '../decode/load';
@@ -10,7 +9,6 @@ export function TopBar() {
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
   const hasSource = useEditor((s) => !!s.source);
-  const [menu, setMenu] = useState(false);
   const [help, setHelp] = useState(false);
 
   const open = async () => {
@@ -20,11 +18,16 @@ export function TopBar() {
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-1 bg-[#1d1a26] px-2 text-white sm:px-3">
-      <div className="flex min-w-0 items-center gap-2 font-bold">
-        <span className="truncate" dir="ltr">
-          Gifluko
-        </span>
-      </div>
+      <button
+        type="button"
+        className="focus-ring min-w-0 truncate rounded-md px-1 font-bold hover:text-white/80"
+        dir="ltr"
+        onClick={() => hasSource && void closeCurrent()}
+        title="חזרה לדף הפתיחה"
+        aria-label="Gifluko, חזרה לדף הפתיחה"
+      >
+        Gifluko
+      </button>
       <div className="flex-1" />
       <button type="button" className="btn-dark px-2" onClick={undo} disabled={!canUndo} title="ביטול (Ctrl+Z)" aria-label="ביטול">
         <Undo2 size={16} /> <span className="hidden md:inline">ביטול</span>
@@ -36,36 +39,9 @@ export function TopBar() {
       <button type="button" className="btn-dark px-2" onClick={open} title="פתיחה (Ctrl+O)" aria-label="פתיחת קובץ">
         <FolderOpen size={16} /> <span className="hidden md:inline">פתיחה</span>
       </button>
-      <Popover.Root open={menu} onOpenChange={setMenu}>
-        <Popover.Trigger asChild>
-          <button type="button" className="btn-dark px-1.5" aria-label="תפריט פרויקט" title="פרויקט">
-            <ChevronDown size={16} />
-          </button>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content sideOffset={6} align="end" collisionPadding={8} className="z-50 w-56 rounded-lg border border-line bg-white p-1 text-ink shadow-xl" dir="rtl">
-            <MenuItem
-              icon={<Keyboard size={15} />}
-              onClick={() => {
-                setMenu(false);
-                setHelp(true);
-              }}
-            >
-              קיצורי מקלדת
-            </MenuItem>
-            <MenuItem
-              icon={<X size={15} />}
-              disabled={!hasSource}
-              onClick={() => {
-                setMenu(false);
-                void closeCurrent();
-              }}
-            >
-              סגירה וחזרה לדף הפתיחה
-            </MenuItem>
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+      <button type="button" className="btn-dark px-2" onClick={() => setHelp(true)} title="קיצורי מקלדת" aria-label="קיצורי מקלדת">
+        <Keyboard size={16} />
+      </button>
       <button
         type="button"
         className="btn-accent ms-1 px-3"
@@ -77,14 +53,5 @@ export function TopBar() {
       </button>
       <ShortcutsHelp open={help} onOpenChange={setHelp} />
     </header>
-  );
-}
-
-function MenuItem({ icon, children, onClick, disabled }: { icon: React.ReactNode; children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
-  return (
-    <button type="button" disabled={disabled} onClick={onClick} className="focus-ring flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-right text-sm hover:bg-accent-soft disabled:opacity-40">
-      <span className="text-ink-soft">{icon}</span>
-      {children}
-    </button>
   );
 }
