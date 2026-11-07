@@ -20,7 +20,7 @@ export function StartScreen() {
       <div className="w-full max-w-3xl">
         <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">עורך טקסט לגיפים</h1>
         <p className="mt-2 text-ink-soft">
-          אוגר סיני זקן פעם אמר: "מה, נריץ?""
+          אוגר סיני זקן פעם אמר: "מה, נריץ?"
           <br />
           יהי סקוויקו ברוך
         </p>
