@@ -151,7 +151,7 @@ function gifOptions(job: ExportJob, w: number, h: number): GifStreamOptions {
     width: w,
     height: h,
     colors: s.colors,
-    dither: s.dither,
+    dither: 'none',
     repeat: repeatFor(s.loop, s.loopTimes, job.source.loopCount),
     hasAlpha: job.source.hasAlpha,
     optimize: s.optimize

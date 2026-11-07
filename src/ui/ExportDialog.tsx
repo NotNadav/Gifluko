@@ -180,19 +180,6 @@ export function ExportDialog() {
                   <NumberField className="w-40 shrink-0" label="צבעים" value={settings.colors} min={2} max={256} onChange={(v) => set({ colors: v })} />
                   <input type="range" dir="ltr" min={2} max={256} value={settings.colors} aria-label="מספר צבעים" className="min-w-0 flex-1" onChange={(e) => set({ colors: Number(e.target.value) })} />
                 </div>
-                <Row label="פיזור צבע">
-                  <SelectField
-                    label="שיטת פיזור צבע"
-                    value={settings.dither}
-                    onChange={(v) => set({ dither: v })}
-                    options={[
-                      { value: 'none', label: 'ללא (הקובץ הקטן ביותר)' },
-                      { value: 'floyd', label: 'Floyd–Steinberg (מעברים חלקים)' },
-                      { value: 'bayer4', label: 'Bayer 4×4 (דפוס סדור)' },
-                      { value: 'bayer8', label: 'Bayer 8×8 (דפוס סדור עדין)' }
-                    ]}
-                  />
-                </Row>
                 <Toggle label="אופטימיזציה" checked={settings.optimize} onChange={(v) => set({ optimize: v })}>
                   שמירת אזורים שלא השתנו בין פריימים (קובץ קטן יותר)
                 </Toggle>

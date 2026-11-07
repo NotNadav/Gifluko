@@ -1,5 +1,5 @@
 import { del, get, set } from 'idb-keyval';
-import type { CustomFont, Doc, SavedStyle } from '../model/types';
+import type { CustomFont, Doc } from '../model/types';
 import { normalizeDoc } from './projectFile';
 
 export interface RecentEntry {
@@ -24,7 +24,6 @@ export interface StoredProject {
 const K = {
   index: 'gcs:index',
   current: 'gcs:current',
-  styles: 'gcs:styles',
   project: (id: string) => `gcs:p:${id}`,
   blob: (id: string) => `gcs:b:${id}`
 };
@@ -77,14 +76,3 @@ export async function clearCurrent() {
   await del(K.current).catch(() => undefined);
 }
 
-export async function loadStyles(): Promise<SavedStyle[]> {
-  try {
-    return ((await get(K.styles)) as SavedStyle[] | undefined) ?? [];
-  } catch {
-    return [];
-  }
-}
-
-export async function saveStyles(styles: SavedStyle[]) {
-  await set(K.styles, styles);
-}

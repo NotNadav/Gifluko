@@ -9,7 +9,8 @@ import type { TextLayer } from '../../model/types';
 
 const ACCENT = '#6d4aff';
 const GUIDE = '#ff3d8b';
-const SNAPS = Array.from({ length: 24 }, (_, i) => i * 15);
+export const STAGE_PAD = 32;
+const SNAPS =Array.from({ length: 24 }, (_, i) => i * 15);
 
 interface Guides {
   v: number[];
@@ -40,7 +41,8 @@ export function KonvaOverlay() {
     const layer = layerRef.current;
     if (!tr || !layer) return;
     const node = selected && selected.visible && !selected.locked && editingId !== selected.id ? layer.findOne(`#n-${selected.id}`) : null;
-    tr.nodes(node ? [node] : []);
+    if (tr.nodes()[0] !== node) tr.nodes(node ? [node] : []);
+    else if (!tr.isTransforming()) tr.forceUpdate();
     tr.getLayer()?.batchDraw();
   }, [selectedId, selected?.locked, selected?.visible, editingId, layers, geoms]);
 
@@ -110,11 +112,14 @@ export function KonvaOverlay() {
 
   return (
     <Stage
-      width={Math.round(W * zoom)}
-      height={Math.round(H * zoom)}
+      width={Math.round(W * zoom) + STAGE_PAD * 2}
+      height={Math.round(H * zoom) + STAGE_PAD * 2}
+      x={STAGE_PAD}
+      y={STAGE_PAD}
       scaleX={zoom}
       scaleY={zoom}
-      className="absolute inset-0"
+      className="absolute"
+      style={{ left: -STAGE_PAD, top: -STAGE_PAD }}
       onMouseDown={(e) => {
         if (e.target === e.target.getStage()) useEditor.setState({ selectedId: null, editingId: null });
       }}

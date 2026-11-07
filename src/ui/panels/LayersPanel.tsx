@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import * as Popover from '@radix-ui/react-popover';
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ArrowDown, ArrowUp, ChevronDown, Copy, Eye, EyeOff, GripVertical, Lock, LockOpen, Plus, Trash, TriangleExclamationPoint } from 'lucide-react';
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, Lock, LockOpen, Plus, Trash, TriangleExclamationPoint } from 'lucide-react';
 import type { TextLayer } from '../../model/types';
-import { addLayer, addLayerWithStyle, deleteLayer, duplicateLayer, reorderLayers, updateLayer, useEditor } from '../../store/editor';
+import { addLayer, deleteLayer, duplicateLayer, reorderLayers, updateLayer, useEditor } from '../../store/editor';
 import { useLayerGeoms } from '../../render/useLayouts';
-import { templatePlacement, TEMPLATES } from '../../model/templates';
 
 export function LayersPanel() {
   const layers = useEditor((s) => s.doc.layers);
@@ -46,7 +44,6 @@ export function LayersPanel() {
           <button type="button" className="btn flex-1 justify-start border border-dashed border-line text-ink-soft hover:border-accent hover:text-accent" onClick={() => addLayer()}>
             <Plus size={14} /> שכבה חדשה
           </button>
-          <TemplateMenu />
         </div>
       </div>
       {selectedId && (
@@ -67,52 +64,6 @@ export function LayersPanel() {
         </div>
       )}
     </div>
-  );
-}
-
-function TemplateMenu() {
-  const [open, setOpen] = useState(false);
-  const source = useEditor((s) => s.source);
-  const saved = useEditor((s) => s.savedStyles);
-  if (!source) return null;
-  const add = (id: string) => {
-    const t = TEMPLATES.find((x) => x.id === id);
-    if (!t) return;
-    const style = t.style(source.width, source.height);
-    addLayerWithStyle(style, templatePlacement(t, style, source.width, source.height), t.sample);
-    setOpen(false);
-  };
-  return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button type="button" className="btn-outline px-2 text-xs" aria-label="הוספת שכבה מתבנית" title="הוספה מתבנית">
-          תבנית <ChevronDown size={13} />
-        </button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content sideOffset={6} collisionPadding={8} className="z-50 w-48 rounded-lg border border-line bg-white p-1 shadow-xl" dir="rtl">
-          {TEMPLATES.map((t) => (
-            <button key={t.id} type="button" className="focus-ring block w-full rounded-md px-2 py-1.5 text-right text-sm hover:bg-accent-soft" onClick={() => add(t.id)}>
-              {t.name}
-            </button>
-          ))}
-          {saved.length > 0 && <div className="my-1 border-t border-line" />}
-          {saved.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className="focus-ring block w-full truncate rounded-md px-2 py-1.5 text-right text-sm hover:bg-accent-soft"
-              onClick={() => {
-                addLayerWithStyle(s.style, undefined, s.name);
-                setOpen(false);
-              }}
-            >
-              {s.name}
-            </button>
-          ))}
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
   );
 }
 

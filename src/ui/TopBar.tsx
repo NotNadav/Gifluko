@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { ChevronDown, Download, FileBraces, FolderOpen, Keyboard, Redo2, Undo2, X } from 'lucide-react';
+import { ChevronDown, Download, FolderOpen, Keyboard, Redo2, Undo2, X } from 'lucide-react';
 import { redo, undo, useEditor } from '../store/editor';
-import { closeCurrent, downloadProject, openFile, pickFile } from '../app/actions';
+import { closeCurrent, openFile, pickFile } from '../app/actions';
 import { ACCEPT } from '../decode/load';
 import { ShortcutsHelp } from './ShortcutsHelp';
 
@@ -44,16 +44,6 @@ export function TopBar() {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content sideOffset={6} align="end" collisionPadding={8} className="z-50 w-56 rounded-lg border border-line bg-white p-1 text-ink shadow-xl" dir="rtl">
-            <MenuItem
-              icon={<FileBraces size={15} />}
-              disabled={!hasSource}
-              onClick={() => {
-                setMenu(false);
-                void downloadProject();
-              }}
-            >
-              הורדת קובץ פרויקט
-            </MenuItem>
             <MenuItem
               icon={<Keyboard size={15} />}
               onClick={() => {

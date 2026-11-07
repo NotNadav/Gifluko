@@ -1,8 +1,8 @@
-import type { CustomFont, Doc, SavedStyle, TextStyle } from '../model/types';
+import type { CustomFont, Doc } from '../model/types';
 import { closeProject, setSource, toast, useEditor, bumpFonts } from '../store/editor';
 import { loadErrorMessage, LoadError, loadSource, MANY_FRAMES } from '../decode/load';
 import { isProjectFile, parseProjectFile, serializeProject } from '../persist/projectFile';
-import { clearCurrent, deleteProject, getCurrentId, loadProject, loadStyles, saveBlob, saveProject, saveStyles } from '../persist/autosave';
+import { clearCurrent, deleteProject, getCurrentId, loadProject, saveBlob, saveProject } from '../persist/autosave';
 import { ensureFont, isFontAvailable, onFontsChanged, registerCustomFont, registerLocalPlaceholder } from '../fonts/registry';
 import { uid } from '../model/defaults';
 import { baseName, downloadBlob } from '../export/exporter';
@@ -168,7 +168,6 @@ export function initAutosave() {
       e.returnValue = '';
     }
   });
-  loadStyles().then((styles) => setState({ savedStyles: styles }));
 }
 
 export async function downloadProject() {
@@ -200,15 +199,3 @@ export async function uploadFontFile(file: File, replaceId?: string) {
   }
 }
 
-export async function saveStyle(name: string, style: TextStyle) {
-  const s = getState();
-  const list: SavedStyle[] = [...s.savedStyles, { id: uid(), name, style: structuredClone(style) }];
-  setState({ savedStyles: list });
-  await saveStyles(list).catch(() => storageFailed());
-}
-
-export async function deleteStyle(id: string) {
-  const list = getState().savedStyles.filter((x) => x.id !== id);
-  setState({ savedStyles: list });
-  await saveStyles(list).catch(() => undefined);
-}

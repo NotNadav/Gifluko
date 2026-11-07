@@ -42,7 +42,7 @@ describe('wrapping', () => {
 
 describe('layoutText', () => {
   it('lays out fixed-width boxes with alignment', () => {
-    const l = layoutText(input({ text: 'aaaa bbbb cccc', fontSize: 10, boxWidth: 50, align: 'right', lineHeight: 1 }), 'x', fakeCtx(), true);
+    const l = layoutText(input({ text: 'aaaa bbbb cccc', fontSize: 10, boxMode: 'fixed', boxWidth: 50, align: 'right', lineHeight: 1 }), 'x', fakeCtx(), true);
     expect(l.width).toBe(50);
     expect(l.lines.map((x) => x.text)).toEqual(['aaaa bbbb', 'cccc']);
     expect(l.lines[0].x).toBeCloseTo(5);
@@ -58,14 +58,14 @@ describe('layoutText', () => {
   });
 
   it('justifies all lines but the last', () => {
-    const l = layoutText(input({ text: 'aa bb cc dd ee', fontSize: 10, boxWidth: 45, align: 'justify', direction: 'rtl' }), 'x', fakeCtx(), true);
+    const l = layoutText(input({ text: 'aa bb cc dd ee', fontSize: 10, boxMode: 'fixed', boxWidth: 45, align: 'justify', direction: 'rtl' }), 'x', fakeCtx(), true);
     expect(l.lines[0].wordSpacing).toBeGreaterThan(0);
     expect(l.lines[0].width).toBe(45);
     expect(l.lines[l.lines.length - 1].wordSpacing).toBe(0);
   });
 
   it('auto-fits font size to the box width', () => {
-    const l = layoutText(input({ text: 'abcdefghij', fontSize: 10, autoSize: true, boxWidth: 200 }), 'x', fakeCtx(), true);
+    const l = layoutText(input({ text: 'abcdefghij', fontSize: 10, autoSize: true, boxMode: 'fixed', boxWidth: 200 }), 'x', fakeCtx(), true);
     expect(l.fontSize).toBe(40);
     expect(l.lines).toHaveLength(1);
   });

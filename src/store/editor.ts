@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { CustomFont, Doc, ExportSettings, SavedStyle, SourceData, TextLayer, TextStyle } from '../model/types';
+import type { CustomFont, Doc, ExportSettings, SourceData, TextLayer } from '../model/types';
 import { createLayer, defaultExport, uid } from '../model/defaults';
 
 export interface Toast {
@@ -33,7 +33,6 @@ interface EditorState {
   fontsVersion: number;
   missingFonts: string[];
   customFonts: CustomFont[];
-  savedStyles: SavedStyle[];
   picking: ((hex: string) => void) | null;
   exportOpen: boolean;
   loading: LoadingState | null;
@@ -63,7 +62,6 @@ export const useEditor = create<EditorState>(() => ({
   fontsVersion: 0,
   missingFonts: [],
   customFonts: [],
-  savedStyles: [],
   picking: null,
   exportOpen: false,
   loading: null,
@@ -193,10 +191,6 @@ export function addLayer(partial: Partial<TextLayer> = {}) {
   return layer;
 }
 
-export function addLayerWithStyle(style: TextStyle, place?: { anchor: TextLayer['anchor']; x: number; y: number }, text?: string) {
-  return addLayer({ ...structuredClone(style), ...(place ?? {}), ...(text ? { text } : {}) });
-}
-
 export function deleteLayer(id: string) {
   const s = get();
   const idx = s.doc.layers.findIndex((l) => l.id === id);
@@ -223,10 +217,6 @@ export function reorderLayers(fromIndex: number, toIndex: number) {
     const [l] = doc.layers.splice(fromIndex, 1);
     doc.layers.splice(toIndex, 0, l);
   });
-}
-
-export function applyStyleToLayer(id: string, style: TextStyle) {
-  updateLayer(id, (l) => Object.assign(l, structuredClone(style)), `style:${id}:${Date.now()}`);
 }
 
 let toastSeq = 0;

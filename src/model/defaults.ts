@@ -15,7 +15,7 @@ export const defaultStyle = (): TextStyle => ({
   lineHeight: 1.15,
   align: 'center',
   direction: 'auto',
-  boxMode: 'fixed',
+  boxMode: 'auto',
   boxWidth: 400,
   fill: {
     type: 'solid',
@@ -63,7 +63,6 @@ export const defaultExport = (): ExportSettings => ({
   scale: 100,
   colors: 256,
   quality: 80,
-  dither: 'none',
   loop: 'source',
   loopTimes: 1,
   frameStep: 1,
@@ -71,14 +70,3 @@ export const defaultExport = (): ExportSettings => ({
   optimize: true
 });
 
-export const STYLE_KEYS: (keyof TextStyle)[] = [
-  'fontFamily', 'fontSize', 'autoSize', 'fontWeight', 'italic', 'underline', 'strike', 'textCase',
-  'letterSpacing', 'lineHeight', 'align', 'direction', 'boxMode', 'boxWidth', 'fill', 'opacity',
-  'stroke', 'shadow', 'glow', 'background'
-];
-
-export function pickStyle(layer: TextLayer): TextStyle {
-  const out = {} as Record<string, unknown>;
-  for (const k of STYLE_KEYS) out[k] = structuredClone(layer[k]);
-  return out as unknown as TextStyle;
-}

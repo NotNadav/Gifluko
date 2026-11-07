@@ -63,7 +63,6 @@ export interface ExportSettings {
   scale: number;
   colors: number;
   quality: number;
-  dither: DitherMode;
   loop: LoopMode;
   loopTimes: number;
   frameStep: number;
@@ -92,12 +91,6 @@ export interface SourceData extends SourceInfo {
 export interface Doc {
   layers: TextLayer[];
   exportSettings: ExportSettings;
-}
-
-export interface SavedStyle {
-  id: string;
-  name: string;
-  style: TextStyle;
 }
 
 export interface CustomFont {
