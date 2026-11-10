@@ -23,6 +23,7 @@ export async function decodeVideo(buffer: ArrayBuffer, fileName: string, onProgr
     if (code !== 0) throw new Error('bad-file');
   } finally {
     ff.off('progress', handler);
+    await ff.deleteFile(input).catch(() => undefined);
   }
   const names = (await ff.listDir('/')).filter((e) => !e.isDir && e.name.startsWith('vf_')).map((e) => e.name).sort();
   if (!names.length) throw new Error('bad-file');
@@ -33,7 +34,6 @@ export async function decodeVideo(buffer: ArrayBuffer, fileName: string, onProgr
     await ff.deleteFile(names[i]);
     onProgress?.(0.9 + (0.1 * (i + 1)) / names.length);
   }
-  await ff.deleteFile(input).catch(() => undefined);
   const delay = Math.round(100 / VIDEO_FPS) * 10;
   return {
     frames,

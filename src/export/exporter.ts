@@ -103,6 +103,10 @@ function runGifWorker(
   onProgress: (done: number, total: number) => void
 ): Promise<{ bytes: Uint8Array; sizes: number[] }> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new ExportCancelled());
+      return;
+    }
     const worker = new Worker(new URL('./gif.worker.ts', import.meta.url), { type: 'module' });
     const abort = () => {
       worker.terminate();

@@ -97,6 +97,7 @@ export function NumberField({ label, value, onChange, min = -Infinity, max = Inf
             e.target.select();
           }}
           onBlur={() => {
+            if (!focused.current) return;
             focused.current = false;
             commitText();
           }}
@@ -106,6 +107,7 @@ export function NumberField({ label, value, onChange, min = -Infinity, max = Inf
               commitText();
               (e.target as HTMLInputElement).blur();
             } else if (e.key === 'Escape') {
+              focused.current = false;
               setText(fmt(value));
               (e.target as HTMLInputElement).blur();
             } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
