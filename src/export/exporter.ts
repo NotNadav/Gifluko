@@ -221,7 +221,7 @@ async function exportFfmpeg(job: ExportJob, format: 'mp4' | 'webp'): Promise<Blo
     const args =
       format === 'mp4'
         ? ['-f', 'concat', '-safe', '0', '-i', 'ex_list.txt', '-fps_mode', 'vfr', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', String(qualityToCrf(job.settings.quality)), '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out]
-        : ['-f', 'concat', '-safe', '0', '-i', 'ex_list.txt', '-fps_mode', 'vfr', '-c:v', 'libwebp_anim', '-lossless', '0', '-q:v', String(qualityToWebp(job.settings.quality)), '-loop', String(loop < 0 ? 1 : loop), out];
+        : ['-f', 'concat', '-safe', '0', '-i', 'ex_list.txt', '-fps_mode', 'vfr', '-c:v', 'libwebp_anim', '-lossless', '0', '-q:v', String(qualityToWebp(job.settings.quality)), '-loop', String(loop < 0 ? 1 : loop === 0 ? 0 : loop + 1), out];
     let code: number;
     try {
       code = await ff.exec(args);

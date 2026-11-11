@@ -41,20 +41,28 @@ export async function decodeWithImageDecoder(buffer: ArrayBuffer, type: string, 
     const delays: number[] = new Array(n);
     let done = 0;
     const BATCH = 8;
-    for (let start = 0; start < n; start += BATCH) {
-      const idx = Array.from({ length: Math.min(BATCH, n - start) }, (_, k) => start + k);
-      await Promise.all(
-        idx.map(async (i) => {
-          const { image } = await dec.decode({ frameIndex: i });
-          try {
-            frames[i] = await createImageBitmap(image);
-            delays[i] = normalizeDelay((image.duration ?? 100000) / 1000);
-          } finally {
-            image.close();
-          }
-          onProgress?.(++done / n);
-        })
-      );
+    try {
+      for (let start = 0; start < n; start += BATCH) {
+        const idx = Array.from({ length: Math.min(BATCH, n - start) }, (_, k) => start + k);
+        await Promise.allSettled(
+          idx.map(async (i) => {
+            const { image } = await dec.decode({ frameIndex: i });
+            try {
+              frames[i] = await createImageBitmap(image);
+              delays[i] = normalizeDelay((image.duration ?? 100000) / 1000);
+            } finally {
+              image.close();
+            }
+            onProgress?.(++done / n);
+          })
+        ).then((rs) => {
+          const bad = rs.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+          if (bad) throw bad.reason;
+        });
+      }
+    } catch (e) {
+      frames.forEach((f) => f?.close());
+      throw e;
     }
     const rep = track.repetitionCount;
     const loopCount = !isFinite(rep) ? 0 : rep > 0 ? rep : null;

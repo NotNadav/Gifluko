@@ -28,11 +28,17 @@ export async function decodeVideo(buffer: ArrayBuffer, fileName: string, onProgr
   const names = (await ff.listDir('/')).filter((e) => !e.isDir && e.name.startsWith('vf_')).map((e) => e.name).sort();
   if (!names.length) throw new Error('bad-file');
   const frames: ImageBitmap[] = [];
-  for (let i = 0; i < names.length; i++) {
-    const data = (await ff.readFile(names[i])) as Uint8Array;
-    frames.push(await createImageBitmap(new Blob([data as BlobPart], { type: 'image/png' })));
-    await ff.deleteFile(names[i]);
-    onProgress?.(0.9 + (0.1 * (i + 1)) / names.length);
+  try {
+    for (let i = 0; i < names.length; i++) {
+      const data = (await ff.readFile(names[i])) as Uint8Array;
+      frames.push(await createImageBitmap(new Blob([data as BlobPart], { type: 'image/png' })));
+      await ff.deleteFile(names[i]);
+      onProgress?.(0.9 + (0.1 * (i + 1)) / names.length);
+    }
+  } catch (e) {
+    frames.forEach((f) => f.close());
+    await cleanFS(ff, 'vf_').catch(() => undefined);
+    throw e;
   }
   const delay = Math.round(100 / VIDEO_FPS) * 10;
   return {

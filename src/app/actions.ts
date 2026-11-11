@@ -83,7 +83,13 @@ export function pickFile(accept: string): Promise<File | null> {
 }
 
 export async function openRecent(id: string) {
-  const data = await loadProject(id).catch(() => null);
+  let data: Awaited<ReturnType<typeof loadProject>>;
+  try {
+    data = await loadProject(id);
+  } catch {
+    toast('לא הצלחנו לפתוח את הפרויקט.', 'error');
+    return false;
+  }
   if (!data) {
     toast('הפרויקט לא נמצא באחסון של הדפדפן.', 'error');
     await deleteProject(id).catch(() => undefined);
@@ -125,7 +131,7 @@ let storageWarned = false;
 function storageFailed() {
   if (storageWarned) return;
   storageWarned = true;
-  toast('השמירה האוטומטית נכשלה (ייתכן שהאחסון של הדפדפן מלא). מומלץ להוריד קובץ פרויקט.', 'error', { label: 'הורדת קובץ פרויקט', run: () => void downloadProject() }, 0);
+  toast('השמירה האוטומטית נכשלה (ייתכן שהאחסון של הדפדפן מלא). מומלץ להוריד קובץ פרויקט.', 'error', { label: 'הורדת קובץ פרויקט', run: () => void downloadProject().catch(() => toast('הורדת קובץ הפרויקט נכשלה.', 'error')) }, 0);
 }
 
 export async function autosaveNow() {

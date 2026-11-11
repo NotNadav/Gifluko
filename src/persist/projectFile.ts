@@ -47,7 +47,7 @@ export function normalizeDoc(raw: unknown): Doc {
   const d = (raw ?? {}) as Partial<Doc>;
   const base = defaultStyle();
   const layers = Array.isArray(d.layers)
-    ? d.layers.map((l) => ({
+    ? d.layers.filter((l) => l !== null && typeof l === 'object').map((l) => ({
         ...base,
         ...l,
         fill: { ...base.fill, ...(l.fill ?? {}), gradient: { ...base.fill.gradient, ...(l.fill?.gradient ?? {}) } },
