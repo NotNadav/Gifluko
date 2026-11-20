@@ -21,6 +21,9 @@ export async function decodeVideo(buffer: ArrayBuffer, fileName: string, onProgr
       'vf_%05d.png'
     ]);
     if (code !== 0) throw new Error('bad-file');
+  } catch (e) {
+    await cleanFS(ff, 'vf_');
+    throw e;
   } finally {
     ff.off('progress', handler);
     await ff.deleteFile(input).catch(() => undefined);

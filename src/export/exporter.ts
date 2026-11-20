@@ -142,6 +142,7 @@ function runGifWorker(
         }
         worker.postMessage({ type: 'end' });
       } catch (err) {
+        signal?.removeEventListener('abort', abort);
         worker.terminate();
         reject(err);
       }
@@ -233,6 +234,9 @@ async function exportFfmpeg(job: ExportJob, format: 'mp4' | 'webp'): Promise<Blo
     const data = (await ff.readFile(out)) as Uint8Array;
     await cleanFS(ff, 'ex_');
     return new Blob([data as BlobPart], { type: format === 'mp4' ? 'video/mp4' : 'image/webp' });
+  } catch (e) {
+    await cleanFS(ff, 'ex_');
+    throw e;
   } finally {
     job.signal?.removeEventListener('abort', onAbort);
   }
